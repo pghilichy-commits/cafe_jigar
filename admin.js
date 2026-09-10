@@ -1,8 +1,4 @@
-/* =====================================================
-   CAFE JIGAR - ADMIN PANEL
-   Supabase Online Version
-===================================================== */
-
+alert("ADMIN JS OK");
 const { createClient } = window.supabase;
 
 const sb = createClient(
