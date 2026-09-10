@@ -1,26 +1,1102 @@
-const {createClient}=window.supabase;const sb=createClient(CAFE_CONFIG.SUPABASE_URL,CAFE_CONFIG.SUPABASE_KEY);let settings={},cats=[],products=[];const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-async function init(){if(!CAFE_CONFIG.SUPABASE_URL.startsWith('http'))return msg('ابتدا config.js را تنظیم کنید.');const {data:{session}}=await sb.auth.getSession();session?showApp():showLogin()}
-function showLogin(){$('login').classList.remove('hidden');$('app').classList.add('hidden')};function showApp(){$('login').classList.add('hidden');$('app').classList.remove('hidden');load()}
-async function signIn(){let email=$('email').value.trim(),password=$('password').value;if(!email||!password)return msg('ایمیل و رمز را وارد کنید.');let {error}=await sb.auth.signInWithPassword({email,password});if(error)msg('ورود ناموفق: '+error.message);else showApp()}
-async function signOut(){await sb.auth.signOut();showLogin()};function msg(x){$('status').textContent=x}
-async function load(){let [s,c,p]=await Promise.all([sb.from('site_settings').select('data').eq('id',1).single(),sb.from('categories').select('*').order('sort_order'),sb.from('products').select('*').order('sort_order')]);if(s.error||c.error||p.error)return msg('خطا در خواندن دیتابیس. SQL را اجرا کنید.');settings=s.data.data||{};cats=c.data||[];products=p.data||[];tab('products')}
-function tab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='products')productsTab();if(t==='categories')catsTab();if(t==='home')homeTab();if(t==='brand')brandTab();if(t==='qr')qrTab();if(t==='footer')footerTab();if(t==='appearance')appearanceTab()}
-async function saveSettings(data){settings={...settings,...data};let {error}=await sb.from('site_settings').upsert({id:1,data:settings,updated_at:new Date().toISOString()});if(error)msg(error.message);else msg('ذخیره شد.')}
-async function upload(file){if(!file)return '';let ext=(file.name.split('.').pop()||'jpg').toLowerCase();let path=Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;let r=await sb.storage.from('menu-images').upload(path,file,{upsert:false});if(r.error)throw r.error;return sb.storage.from('menu-images').getPublicUrl(path).data.publicUrl}
-function productsTab(){ $('bodyPanel').innerHTML=`<div class="panel"><h2>آیتم‌ها</h2><button class="primary" onclick="editProduct()">+ افزودن آیتم</button></div><div class="panel">${products.map(p=>`<div class="row"><div><b>${esc(p.name)}</b><small>${Number(p.price).toLocaleString('fa-IR')} تومان ${p.discount?' • '+p.discount+'% تخفیف':''}</small></div><div><button onclick="editProduct(${p.id})">ویرایش</button><button class="danger" onclick="delProduct(${p.id})">حذف</button></div></div>`).join('')}</div>`}
-function editProduct(id){let p=id?products.find(x=>x.id===id):{name:'',category_id:cats[0]?.id||'',description:'',price:0,old_price:0,discount:0,image_url:'',featured:false,available:true,sort_order:products.length+1};$('bodyPanel').innerHTML=`<div class="panel"><h2>${id?'ویرایش آیتم':'افزودن آیتم'}</h2><div class="grid2"><label>نام<input id="pn" value="${esc(p.name)}"></label><label>دسته<select id="pc">${cats.map(c=>`<option value="${c.id}" ${c.id===p.category_id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label><label>قیمت<input id="pp" type="number" value="${p.price||0}"></label><label>قیمت قبل<input id="po" type="number" value="${p.old_price||0}"></label><label>تخفیف %<input id="pd" type="number" min="0" max="100" value="${p.discount||0}"></label><label>ترتیب<input id="ps" type="number" value="${p.sort_order||0}"></label></div><label>توضیحات<textarea id="px">${esc(p.description||'')}</textarea></label><label>عکس<input id="pi" type="file" accept="image/*"></label><img class="preview" src="${esc(p.image_url||'')}" ${p.image_url?'':'style="display:none"'}><label><input id="pf" type="checkbox" ${p.featured?'checked':''}> ویژه</label><label><input id="pa" type="checkbox" ${p.available!==false?'checked':''}> نمایش در منو</label><div class="actions"><button class="primary" onclick="saveProduct(${id||0})">ذخیره</button><button onclick="productsTab()">انصراف</button></div></div>`}
-async function saveProduct(id){try{let old=id?products.find(x=>x.id===id):null,img=old?.image_url||'';if($('pi').files[0])img=await upload($('pi').files[0]);let obj={name:$('pn').value,category_id:$('pc').value,description:$('px').value,price:+$('pp').value,old_price:+$('po').value,discount:+$('pd').value,image_url:img,featured:$('pf').checked,available:$('pa').checked,sort_order:+$('ps').value||0};let r=id?await sb.from('products').update(obj).eq('id',id):await sb.from('products').insert(obj);if(r.error)throw r.error;await load()}catch(e){msg(e.message)}}
-async function delProduct(id){if(confirm('حذف شود؟')){let r=await sb.from('products').delete().eq('id',id);if(r.error)msg(r.error.message);else load()}}
-function catsTab(){$('bodyPanel').innerHTML=`<div class="panel"><h2>دسته‌بندی‌ها</h2>${cats.map(c=>`<div class="row"><b>${esc(c.name)}</b><div><button onclick="renameCat('${esc(c.id)}')">ویرایش</button><button class="danger" onclick="delCat('${esc(c.id)}')">حذف</button></div></div>`).join('')}<button class="primary" onclick="addCat()">+ دسته جدید</button></div>`}
-async function addCat(){let n=prompt('نام دسته؟');if(n){let r=await sb.from('categories').insert({id:'c'+Date.now(),name:n,sort_order:cats.length+1});if(r.error)msg(r.error.message);else load()}}
-async function renameCat(id){let c=cats.find(x=>x.id===id),n=prompt('نام جدید',c.name);if(n){let r=await sb.from('categories').update({name:n}).eq('id',id);if(r.error)msg(r.error.message);else load()}}
-async function delCat(id){if(confirm('دسته حذف شود؟')){let r=await sb.from('categories').delete().eq('id',id);if(r.error)msg(r.error.message);else load()}}
-function homeTab(){let h=settings.home||{};$('bodyPanel').innerHTML=`<div class="panel"><h2>صفحه اصلی</h2><label>متن کوچک<input id="hk" value="${esc(h.kicker)}"></label><label>عنوان<input id="ht" value="${esc(h.title)}"></label><label>توضیحات<textarea id="hx">${esc(h.text)}</textarea></label><label>متن دکمه<input id="hb" value="${esc(h.button)}</label><label>لینک/آدرس تصویر فعلی<input id="hu" value="${esc(h.hero)}</label><label>تصویر جدید<input id="hi" type="file" accept="image/*"></label><button class="primary" onclick="saveHome()">ذخیره</button></div>`}
-async function saveHome(){let hero=$('hu').value;if($('hi').files[0])hero=await upload($('hi').files[0]);await saveSettings({home:{kicker:$('hk').value,title:$('ht').value,text:$('hx').value,button:$('hb').value,hero}});}
-function brandTab(){let b=settings.brand||{};$('bodyPanel').innerHTML=`<div class="panel"><h2>مجموعه و لوگو</h2><label>نام<input id="bn" value="${esc(b.name)}"></label><div class="grid2"><label>تلفن<input id="bp" value="${esc(b.phone)}"></label><label>اینستاگرام<input id="bi" value="${esc(b.instagram)}"></label></div><label>آدرس<input id="ba" value="${esc(b.address)}"></label><label>ساعت کاری<input id="bh" value="${esc(b.hours)}"></label><label>لوگو فعلی / لینک<input id="blurl" value="${esc(b.logo)}"></label><label>آپلود لوگو<input id="bl" type="file" accept="image/*"></label><button class="primary" onclick="saveBrand()">ذخیره</button></div>`}
-async function saveBrand(){let logo=$('blurl').value;if($('bl').files[0])logo=await upload($('bl').files[0]);await saveSettings({brand:{name:$('bn').value,phone:$('bp').value,instagram:$('bi').value,address:$('ba').value,hours:$('bh').value,logo}})}
-function qrTab(){let q=settings.qr||{};$('bodyPanel').innerHTML=`<div class="panel"><h2>QR</h2><label>لینک منو<input id="qu" value="${esc(q.url||location.origin+'/index.html')}"></label><label>متن<input id="ql" value="${esc(q.label||'برای مشاهده منوی کافه جیگر اسکن کنید')}"></label><label>اندازه<input id="qs" type="number" value="${q.size||240}"></label><button class="primary" onclick="saveQR()">ذخیره</button></div>`}
-async function saveQR(){await saveSettings({qr:{url:$('qu').value,label:$('ql').value,size:+$('qs').value||240}})}
-function footerTab(){let f=settings.footer||{};$('bodyPanel').innerHTML=`<div class="panel"><h2>طراح و فوتر</h2><label>متن<input id="fd" value="${esc(f.designer)}"></label><label>لینک<input id="fl" value="${esc(f.link)}"></label><label><input id="fs" type="checkbox" ${f.show!==false?'checked':''}> نمایش</label><button class="primary" onclick="saveFooter()">ذخیره</button></div>`};async function saveFooter(){await saveSettings({footer:{designer:$('fd').value,link:$('fl').value,show:$('fs').checked}})}
-function appearanceTab(){let a=settings.appearance||{};$('bodyPanel').innerHTML=`<div class="panel"><h2>ظاهر</h2><div class="grid2"><label>رنگ اصلی<input id="aa" type="color" value="${a.accent||'#d6a85b'}"></label><label>زمینه<input id="ab" type="color" value="${a.bg||'#090909'}"></label><label>کارت<input id="ac" type="color" value="${a.card||'#151515'}"></label><label>تیرگی هیرو %<input id="ad" type="number" value="${a.heroDark||88}"></label></div><button class="primary" onclick="saveAppearance()">ذخیره</button></div>`};async function saveAppearance(){await saveSettings({appearance:{accent:$('aa').value,bg:$('ab').value,card:$('ac').value,heroDark:+$('ad').value}})}
-init();
+const { createClient } = window.supabase;
+
+const sb = createClient(
+  CAFE_CONFIG.SUPABASE_URL,
+  CAFE_CONFIG.SUPABASE_KEY
+);
+
+let settings = {};
+let cats = [];
+let products = [];
+
+const $ = id => document.getElementById(id);
+
+function msg(text) {
+  const el = $('msg');
+
+  if (el) {
+    el.textContent = text;
+
+    setTimeout(() => {
+      el.textContent = '';
+    }, 4000);
+  }
+}
+
+function esc(s) {
+  return String(s ?? '').replace(
+    /[&<>"']/g,
+    m => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m])
+  );
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+async function login() {
+
+  const email = $('email')?.value?.trim();
+  const password = $('password')?.value || '';
+
+  if (!email || !password) {
+    msg('ایمیل و رمز عبور را وارد کنید.');
+    return;
+  }
+
+  const { error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    msg('ورود ناموفق بود: ' + error.message);
+    return;
+  }
+
+  msg('ورود موفق بود.');
+
+  setTimeout(() => {
+    location.reload();
+  }, 700);
+}
+
+
+async function logout() {
+
+  await sb.auth.signOut();
+
+  location.reload();
+}
+
+
+/* =========================
+   AUTH CHECK
+========================= */
+
+async function checkAuth() {
+
+  const { data } = await sb.auth.getSession();
+
+  const session = data?.session;
+
+  const loginBox = $('loginBox');
+  const adminBox = $('adminBox');
+
+  if (session) {
+
+    if (loginBox) {
+      loginBox.style.display = 'none';
+    }
+
+    if (adminBox) {
+      adminBox.style.display = 'block';
+    }
+
+    await load();
+
+  } else {
+
+    if (loginBox) {
+      loginBox.style.display = 'block';
+    }
+
+    if (adminBox) {
+      adminBox.style.display = 'none';
+    }
+  }
+}
+
+
+/* =========================
+   LOAD DATA
+========================= */
+
+async function load() {
+
+  try {
+
+    const [s, c, p] = await Promise.all([
+
+      sb
+        .from('site_settings')
+        .select('data')
+        .eq('id', 'main')
+        .single(),
+
+      sb
+        .from('categories')
+        .select('*')
+        .order('sort_order'),
+
+      sb
+        .from('products')
+        .select('*')
+        .order('sort_order')
+
+    ]);
+
+
+    if (s.error) {
+      console.error('settings error:', s.error);
+      msg('خطا در دریافت تنظیمات: ' + s.error.message);
+      return;
+    }
+
+    if (c.error) {
+      console.error('categories error:', c.error);
+      msg('خطا در دریافت دسته‌بندی‌ها: ' + c.error.message);
+      return;
+    }
+
+    if (p.error) {
+      console.error('products error:', p.error);
+      msg('خطا در دریافت محصولات: ' + p.error.message);
+      return;
+    }
+
+
+    settings = s.data?.data || {};
+    cats = c.data || [];
+    products = p.data || [];
+
+
+    renderProducts();
+    renderCategories();
+    renderSettings();
+
+  } catch (err) {
+
+    console.error(err);
+
+    msg('خطای غیرمنتظره در اتصال به دیتابیس.');
+
+  }
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+function tab(name) {
+
+  document
+    .querySelectorAll('.tab-content')
+    .forEach(el => {
+      el.style.display = 'none';
+    });
+
+
+  const target = $(name);
+
+  if (target) {
+    target.style.display = 'block';
+  }
+
+
+  document
+    .querySelectorAll('[data-tab]')
+    .forEach(el => {
+
+      el.classList.toggle(
+        'active',
+        el.dataset.tab === name
+      );
+
+    });
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+function renderSettings() {
+
+  const h = settings.home || {};
+  const b = settings.brand || {};
+  const a = settings.appearance || {};
+  const q = settings.qr || {};
+  const f = settings.footer || {};
+
+
+  if ($('homeTitle'))
+    $('homeTitle').value = h.title || '';
+
+  if ($('homeText'))
+    $('homeText').value = h.text || '';
+
+  if ($('homeKicker'))
+    $('homeKicker').value = h.kicker || '';
+
+  if ($('homeButton'))
+    $('homeButton').value = h.button || 'مشاهده منو';
+
+
+  if ($('logo'))
+    $('logo').value = b.logo || '';
+
+  if ($('phone'))
+    $('phone').value = b.phone || '';
+
+  if ($('instagram'))
+    $('instagram').value = b.instagram || '';
+
+  if ($('address'))
+    $('address').value = b.address || '';
+
+  if ($('hours'))
+    $('hours').value = b.hours || '';
+
+
+  if ($('hero'))
+    $('hero').value = h.hero || '';
+
+
+  if ($('accent'))
+    $('accent').value = a.accent || '#d6a85b';
+
+  if ($('bg'))
+    $('bg').value = a.bg || '#090909';
+
+  if ($('card'))
+    $('card').value = a.card || '#151515';
+
+
+  if ($('qrUrl'))
+    $('qrUrl').value = q.url || '';
+
+  if ($('qrSize'))
+    $('qrSize').value = q.size || 240;
+
+  if ($('qrLabel'))
+    $('qrLabel').value =
+      q.label ||
+      'برای مشاهده منوی کافه جیگر اسکن کنید';
+
+
+  if ($('designer'))
+    $('designer').value = f.designer || '';
+
+  if ($('footerShow'))
+    $('footerShow').checked =
+      f.show !== false;
+}
+
+
+/* =========================
+   SAVE SETTINGS
+========================= */
+
+async function saveSettings() {
+
+  const newSettings = {
+
+    ...settings,
+
+    home: {
+      ...(settings.home || {}),
+
+      title: $('homeTitle')?.value || '',
+      text: $('homeText')?.value || '',
+      kicker: $('homeKicker')?.value || '',
+      button:
+        $('homeButton')?.value ||
+        'مشاهده منو',
+
+      hero:
+        $('hero')?.value || ''
+    },
+
+
+    brand: {
+      ...(settings.brand || {}),
+
+      logo:
+        $('logo')?.value || '',
+
+      phone:
+        $('phone')?.value || '',
+
+      instagram:
+        $('instagram')?.value || '',
+
+      address:
+        $('address')?.value || '',
+
+      hours:
+        $('hours')?.value || ''
+    },
+
+
+    appearance: {
+      ...(settings.appearance || {}),
+
+      accent:
+        $('accent')?.value || '#d6a85b',
+
+      bg:
+        $('bg')?.value || '#090909',
+
+      card:
+        $('card')?.value || '#151515'
+    },
+
+
+    qr: {
+      ...(settings.qr || {}),
+
+      url:
+        $('qrUrl')?.value || '',
+
+      size:
+        Number($('qrSize')?.value || 240),
+
+      label:
+        $('qrLabel')?.value ||
+        'برای مشاهده منوی کافه جیگر اسکن کنید'
+    },
+
+
+    footer: {
+      ...(settings.footer || {}),
+
+      designer:
+        $('designer')?.value || '',
+
+      show:
+        $('footerShow')?.checked !== false
+    }
+
+  };
+
+
+  const { error } = await sb
+    .from('site_settings')
+    .upsert({
+      id: 'main',
+      data: newSettings,
+      updated_at: new Date().toISOString()
+    });
+
+
+  if (error) {
+
+    console.error(error);
+
+    msg(
+      'خطا در ذخیره تنظیمات: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  settings = newSettings;
+
+  msg('تنظیمات با موفقیت ذخیره شد. ✅');
+}
+
+
+/* =========================
+   CATEGORIES
+========================= */
+
+function renderCategories() {
+
+  const box = $('categoriesList');
+
+  if (!box) return;
+
+
+  box.innerHTML = cats.map(c => `
+
+    <div class="admin-row">
+
+      <div>
+        <strong>${esc(c.name)}</strong>
+        <small>
+          ${c.active ? 'فعال' : 'غیرفعال'}
+        </small>
+      </div>
+
+      <div>
+
+        <button
+          onclick="editCategory('${esc(c.id)}')">
+          ویرایش
+        </button>
+
+        <button
+          onclick="toggleCategory('${esc(c.id)}')">
+          ${c.active ? 'غیرفعال کردن' : 'فعال کردن'}
+        </button>
+
+        <button
+          onclick="deleteCategory('${esc(c.id)}')">
+          حذف
+        </button>
+
+      </div>
+
+    </div>
+
+  `).join('');
+}
+
+
+function editCategory(id) {
+
+  const c =
+    cats.find(x => String(x.id) === String(id));
+
+  if (!c) return;
+
+
+  const name =
+    prompt('نام دسته‌بندی:', c.name);
+
+  if (name === null) return;
+
+  const clean =
+    name.trim();
+
+  if (!clean) {
+    msg('نام دسته‌بندی نمی‌تواند خالی باشد.');
+    return;
+  }
+
+
+  updateCategory(
+    c.id,
+    clean
+  );
+}
+
+
+async function updateCategory(id, name) {
+
+  const { error } =
+    await sb
+      .from('categories')
+      .update({
+        name
+      })
+      .eq('id', id);
+
+
+  if (error) {
+
+    msg(
+      'خطا در ویرایش دسته‌بندی: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  msg('دسته‌بندی ویرایش شد.');
+
+  await load();
+}
+
+
+async function toggleCategory(id) {
+
+  const c =
+    cats.find(x => String(x.id) === String(id));
+
+  if (!c) return;
+
+
+  const { error } =
+    await sb
+      .from('categories')
+      .update({
+        active: !c.active
+      })
+      .eq('id', id);
+
+
+  if (error) {
+
+    msg(
+      'خطا: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  await load();
+}
+
+
+async function deleteCategory(id) {
+
+  const c =
+    cats.find(x => String(x.id) === String(id));
+
+  if (!c) return;
+
+
+  if (
+    !confirm(
+      `دسته‌بندی «${c.name}» حذف شود؟`
+    )
+  ) {
+    return;
+  }
+
+
+  const used =
+    products.some(
+      p => String(p.cat) === String(id)
+    );
+
+
+  if (used) {
+
+    msg(
+      'این دسته‌بندی دارای محصول است و فعلاً قابل حذف نیست.'
+    );
+
+    return;
+  }
+
+
+  const { error } =
+    await sb
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+
+  if (error) {
+
+    msg(
+      'خطا در حذف: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  msg('دسته‌بندی حذف شد.');
+
+  await load();
+}
+
+
+/* =========================
+   ADD CATEGORY
+========================= */
+
+async function addCategory() {
+
+  const input =
+    $('newCategory');
+
+  if (!input) return;
+
+
+  const name =
+    input.value.trim();
+
+
+  if (!name) {
+
+    msg('نام دسته‌بندی را وارد کنید.');
+
+    return;
+  }
+
+
+  const id =
+    name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\u0600-\u06FF-]/g, '')
+      +
+      '-' +
+      Date.now();
+
+
+  const { error } =
+    await sb
+      .from('categories')
+      .insert({
+        id,
+        name,
+        sort_order: cats.length + 1,
+        active: true
+      });
+
+
+  if (error) {
+
+    msg(
+      'خطا در ایجاد دسته‌بندی: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  input.value = '';
+
+  msg('دسته‌بندی اضافه شد. ✅');
+
+  await load();
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+function renderProducts() {
+
+  const box =
+    $('productsList');
+
+  if (!box) return;
+
+
+  box.innerHTML =
+    products.map(p => {
+
+      const cat =
+        cats.find(
+          c => String(c.id) === String(p.cat)
+        );
+
+
+      return `
+
+        <div class="admin-row">
+
+          <div>
+
+            <strong>
+              ${esc(p.name)}
+            </strong>
+
+            <div>
+              ${esc(cat?.name || '')}
+            </div>
+
+            <small>
+              ${Number(p.price || 0).toLocaleString('fa-IR')}
+              تومان
+            </small>
+
+          </div>
+
+
+          <div>
+
+            <button
+              onclick="editProduct(${p.id})">
+              ویرایش
+            </button>
+
+            <button
+              onclick="toggleProduct(${p.id})">
+              ${p.available ? 'غیرفعال' : 'فعال'}
+            </button>
+
+            <button
+              onclick="deleteProduct(${p.id})">
+              حذف
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join('');
+}
+
+
+/* =========================
+   PRODUCT FORM
+========================= */
+
+function editProduct(id) {
+
+  const p = id
+    ? products.find(x => x.id == id)
+    : {
+
+        name: '',
+        cat: cats[0]?.id || '',
+        description: '',
+        price: 0,
+        old_price: 0,
+        discount: 0,
+        image_url: '',
+        featured: false,
+        available: true,
+        sort_order:
+          products.length + 1
+
+      };
+
+
+  if (!p) return;
+
+
+  const name =
+    prompt(
+      'نام محصول:',
+      p.name || ''
+    );
+
+  if (name === null) return;
+
+
+  const description =
+    prompt(
+      'توضیحات محصول:',
+      p.description || ''
+    );
+
+  if (description === null) return;
+
+
+  const price =
+    prompt(
+      'قیمت:',
+      p.price || 0
+    );
+
+  if (price === null) return;
+
+
+  const oldPrice =
+    prompt(
+      'قیمت قبلی:',
+      p.old_price || 0
+    );
+
+  if (oldPrice === null) return;
+
+
+  const discount =
+    prompt(
+      'درصد تخفیف:',
+      p.discount || 0
+    );
+
+  if (discount === null) return;
+
+
+  const image =
+    prompt(
+      'لینک تصویر:',
+      p.image_url || ''
+    );
+
+  if (image === null) return;
+
+
+  const category =
+    prompt(
+      'شناسه دسته‌بندی:\n' +
+      cats
+        .map(c => `${c.id} = ${c.name}`)
+        .join('\n'),
+      p.cat || cats[0]?.id || ''
+    );
+
+  if (category === null) return;
+
+
+  saveProduct(
+    id,
+    {
+      name: name.trim(),
+      cat: category.trim(),
+      description: description.trim(),
+      price: Number(price) || 0,
+      old_price: Number(oldPrice) || 0,
+      discount: Number(discount) || 0,
+      image_url: image.trim(),
+      featured: !!p.featured,
+      available: p.available !== false,
+      sort_order: p.sort_order || products.length + 1
+    }
+  );
+}
+
+
+/* =========================
+   SAVE PRODUCT
+========================= */
+
+async function saveProduct(id, data) {
+
+  let result;
+
+
+  if (id) {
+
+    result =
+      await sb
+        .from('products')
+        .update(data)
+        .eq('id', id);
+
+  } else {
+
+    result =
+      await sb
+        .from('products')
+        .insert(data);
+
+  }
+
+
+  if (result.error) {
+
+    console.error(result.error);
+
+    msg(
+      'خطا در ذخیره محصول: ' +
+      result.error.message
+    );
+
+    return;
+  }
+
+
+  msg('محصول با موفقیت ذخیره شد. ✅');
+
+  await load();
+}
+
+
+/* =========================
+   TOGGLE PRODUCT
+========================= */
+
+async function toggleProduct(id) {
+
+  const p =
+    products.find(
+      x => x.id == id
+    );
+
+  if (!p) return;
+
+
+  const { error } =
+    await sb
+      .from('products')
+      .update({
+        available: !p.available
+      })
+      .eq('id', id);
+
+
+  if (error) {
+
+    msg(
+      'خطا: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  await load();
+}
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+async function deleteProduct(id) {
+
+  const p =
+    products.find(
+      x => x.id == id
+    );
+
+  if (!p) return;
+
+
+  if (
+    !confirm(
+      `محصول «${p.name}» حذف شود؟`
+    )
+  ) {
+    return;
+  }
+
+
+  const { error } =
+    await sb
+      .from('products')
+      .delete()
+      .eq('id', id);
+
+
+  if (error) {
+
+    msg(
+      'خطا در حذف محصول: ' +
+      error.message
+    );
+
+    return;
+  }
+
+
+  msg('محصول حذف شد.');
+
+  await load();
+}
+
+
+/* =========================
+   NEW PRODUCT
+========================= */
+
+function newProduct() {
+
+  editProduct(null);
+
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+function searchProducts() {
+
+  const q =
+    $('productSearch')?.value
+      ?.trim()
+      ?.toLowerCase() || '';
+
+
+  const filtered =
+    products.filter(p =>
+
+      `${p.name} ${p.description || ''}`
+        .toLowerCase()
+        .includes(q)
+
+    );
+
+
+  const box =
+    $('productsList');
+
+  if (!box) return;
+
+
+  box.innerHTML =
+    filtered.map(p => {
+
+      const cat =
+        cats.find(
+          c => String(c.id) === String(p.cat)
+        );
+
+
+      return `
+
+        <div class="admin-row">
+
+          <div>
+
+            <strong>
+              ${esc(p.name)}
+            </strong>
+
+            <div>
+              ${esc(cat?.name || '')}
+            </div>
+
+            <small>
+              ${Number(p.price || 0).toLocaleString('fa-IR')}
+              تومان
+            </small>
+
+          </div>
+
+          <div>
+
+            <button
+              onclick="editProduct(${p.id})">
+              ویرایش
+            </button>
+
+            <button
+              onclick="toggleProduct(${p.id})">
+              ${p.available ? 'غیرفعال' : 'فعال'}
+            </button>
+
+            <button
+              onclick="deleteProduct(${p.id})">
+              حذف
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join('');
+}
+
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+
+    checkAuth();
+
+  }
+);
+
+
+/* =========================
+   AUTH STATE
+========================= */
+
+sb.auth.onAuthStateChange(
+  (event, session) => {
+
+    if (event === 'SIGNED_OUT') {
+      location.reload();
+    }
+
+  }
+);
