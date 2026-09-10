@@ -1,318 +1,1415 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>پنل مدیریت | کافه جیگر</title>
 
-  <link rel="stylesheet" href="style.css">
-
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      padding: 16px;
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f5f1eb;
+      color: #29231f;
     }
 
-    .admin {
-      max-width: 1050px;
-      margin: auto;
+    .container {
+      width: min(1100px, 94%);
+      margin: 30px auto;
     }
 
-    .panel {
-      background: #151515;
-      border: 1px solid #2d2d2d;
-      border-radius: 15px;
-      padding: 18px;
-      margin: 12px 0;
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .login-box {
+      max-width: 450px;
+      margin: 80px auto;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin: 7px 0 15px;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    .primary {
+      background: #29231f;
+      color: white;
+      width: 100%;
+    }
+
+    .primary:hover {
+      opacity: .9;
+    }
+
+    .danger {
+      background: #b42318;
+      color: white;
+    }
+
+    .success {
+      background: #16803c;
+      color: white;
     }
 
     .hidden {
       display: none !important;
     }
 
-    .login {
-      max-width: 420px;
-      margin: 80px auto;
+    #status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.8;
+    }
+
+    .status-ok {
+      display: block !important;
+      background: #e9f8ef;
+      color: #126b32;
+    }
+
+    .status-error {
+      display: block !important;
+      background: #fff0f0;
+      color: #a40000;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
     .tabs {
       display: flex;
-      gap: 7px;
-      overflow: auto;
-      padding: 8px 0;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
 
-    .tab,
-    .admin button {
-      border: 1px solid #333;
-      background: #222;
-      color: #eee;
-      border-radius: 8px;
-      padding: 9px 12px;
-      cursor: pointer;
+    .tab {
+      background: #eee8e0;
+      color: #29231f;
     }
 
-    .tab.on,
-    .primary {
-      background: var(--accent);
-      color: #111;
-      border: 0;
+    .tab.active {
+      background: #29231f;
+      color: white;
     }
 
-    .danger {
-      background: #3a1717 !important;
-      color: #ffb2b2 !important;
+    .tab-content {
+      display: none;
     }
 
-    .panel label {
+    .tab-content.active {
       display: block;
-      color: #aaa;
-      font-size: 12px;
-      margin: 12px 0;
     }
 
-    .panel input,
-    .panel textarea,
-    .panel select {
-      display: block;
-      width: 100%;
-      margin-top: 6px;
-      background: #0e0e0e;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 9px;
-      padding: 10px;
-      box-sizing: border-box;
+    .item {
+      border: 1px solid #e5dfd8;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 12px;
     }
 
-    .panel textarea {
-      min-height: 100px;
-    }
-
-    .grid2 {
-      display: grid;
-      grid-template-columns: repeat(
-        auto-fit,
-        minmax(220px, 1fr)
-      );
-      gap: 10px;
-    }
-
-    .row {
+    .item-head {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
       align-items: center;
-      border-bottom: 1px solid #292929;
-      padding: 12px 0;
-    }
-
-    .row small {
-      display: block;
-      color: #888;
-      margin-top: 5px;
+      gap: 10px;
     }
 
     .actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-top: 12px;
     }
 
-    .preview {
-      max-width: 250px;
-      max-height: 180px;
-      border-radius: 10px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
     }
 
-    #status {
-      min-height: 18px;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 8px;
+    @media(max-width:700px) {
+      .grid {
+        grid-template-columns: 1fr;
       }
 
-      .login {
-        margin: 30px auto;
-      }
-
-      .row {
+      .topbar {
         align-items: flex-start;
         flex-direction: column;
       }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="admin">
+<!-- ================= LOGIN ================= -->
 
-    <!-- ================= LOGIN ================= -->
+<div id="loginPage" class="container">
 
-    <div id="login" class="panel login">
+  <div class="card login-box">
 
-      <h2>ورود مدیریت کافه جیگر</h2>
+    <h1>☕ کافه جیگر</h1>
 
-      <label>
-        ایمیل مدیریت
-        <input
-          id="email"
-          type="email"
-          autocomplete="username"
-          placeholder="ایمیل مدیریت"
-        >
-      </label>
+    <h2>ورود به پنل مدیریت</h2>
 
-      <label>
-        رمز مدیریت
-        <input
-          id="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="رمز عبور"
-        >
-      </label>
+    <label>ایمیل</label>
 
-      <div class="actions">
-        <button
-          type="button"
-          class="primary"
-          onclick="signIn()"
-        >
-          ورود
-        </button>
-      </div>
+    <input
+      id="email"
+      type="email"
+      value="pghilichy@gmail.com"
+      placeholder="ایمیل مدیریت"
+    >
 
-      <p
-        id="status"
-        style="color:#aaa;font-size:11px"
-      ></p>
+    <label>رمز عبور</label>
 
+    <input
+      id="password"
+      type="password"
+      value="8585"
+      placeholder="رمز عبور"
+    >
+
+    <button
+      id="loginButton"
+      class="primary"
+      onclick="login()"
+    >
+      ورود به پنل
+    </button>
+
+    <div id="status"></div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= ADMIN ================= -->
+
+<div id="adminPage" class="container hidden">
+
+  <div class="topbar">
+
+    <div>
+      <h1>پنل مدیریت کافه جیگر</h1>
+      <div id="userEmail"></div>
     </div>
 
+    <button
+      class="danger"
+      onclick="logout()"
+    >
+      خروج
+    </button>
 
-    <!-- ================= ADMIN APP ================= -->
+  </div>
 
-    <div id="app" class="hidden">
 
-      <div
-        class="panel"
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-        "
+  <div class="tabs">
+
+    <button
+      class="tab active"
+      onclick="openTab('settings', this)"
+    >
+      تنظیمات
+    </button>
+
+    <button
+      class="tab"
+      onclick="openTab('categories', this)"
+    >
+      دسته‌بندی‌ها
+    </button>
+
+    <button
+      class="tab"
+      onclick="openTab('products', this)"
+    >
+      محصولات
+    </button>
+
+    <button
+      class="tab"
+      onclick="openTab('discount', this)"
+    >
+      تخفیف
+    </button>
+
+  </div>
+
+
+  <!-- SETTINGS -->
+
+  <div id="settings" class="tab-content active">
+
+    <div class="card">
+
+      <h2>تنظیمات منو</h2>
+
+      <label>نام کافه</label>
+      <input id="siteName">
+
+      <label>توضیحات</label>
+      <textarea id="siteDescription"></textarea>
+
+      <label>شماره تماس</label>
+      <input id="sitePhone">
+
+      <label>آدرس</label>
+      <textarea id="siteAddress"></textarea>
+
+      <label>لینک اینستاگرام</label>
+      <input id="instagram">
+
+      <button
+        class="success"
+        onclick="saveSettings()"
       >
-
-        <div>
-          <h2 style="margin:0">
-            پنل مدیریت کافه جیگر
-          </h2>
-
-          <small style="color:#888">
-            ذخیره‌سازی آنلاین
-          </small>
-        </div>
-
-        <button
-          type="button"
-          onclick="signOut()"
-        >
-          خروج
-        </button>
-
-      </div>
-
-
-      <!-- ================= TABS ================= -->
-
-      <div class="tabs">
-
-        <button
-          type="button"
-          class="tab on"
-          data-t="products"
-          onclick="tab('products')"
-        >
-          آیتم‌ها
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="categories"
-          onclick="tab('categories')"
-        >
-          دسته‌ها
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="home"
-          onclick="tab('home')"
-        >
-          صفحه اصلی
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="brand"
-          onclick="tab('brand')"
-        >
-          مجموعه و لوگو
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="qr"
-          onclick="tab('qr')"
-        >
-          QR
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="footer"
-          onclick="tab('footer')"
-        >
-          طراح
-        </button>
-
-        <button
-          type="button"
-          class="tab"
-          data-t="appearance"
-          onclick="tab('appearance')"
-        >
-          ظاهر
-        </button>
-
-      </div>
-
-
-      <!-- ================= CONTENT ================= -->
-
-      <div id="bodyPanel"></div>
+        ذخیره تنظیمات
+      </button>
 
     </div>
 
   </div>
 
 
-  <!-- ================= SCRIPTS ================= -->
+  <!-- CATEGORIES -->
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <div id="categories" class="tab-content">
 
-  <script src="config.js"></script>
+    <div class="card">
 
-  <script src="admin.js"></script>
+      <h2>دسته‌بندی‌ها</h2>
+
+      <div class="grid">
+
+        <div>
+          <label>نام دسته‌بندی</label>
+          <input id="newCategoryName">
+        </div>
+
+        <div style="display:flex;align-items:end">
+          <button
+            class="success"
+            onclick="addCategory()"
+          >
+            افزودن دسته‌بندی
+          </button>
+        </div>
+
+      </div>
+
+      <hr>
+
+      <div id="categoriesList">
+        <div class="loading">در حال دریافت...</div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- PRODUCTS -->
+
+  <div id="products" class="tab-content">
+
+    <div class="card">
+
+      <h2>محصولات</h2>
+
+      <div class="grid">
+
+        <div>
+
+          <label>نام محصول</label>
+          <input id="productName">
+
+          <label>دسته‌بندی</label>
+          <select id="productCategory"></select>
+
+          <label>قیمت</label>
+          <input id="productPrice" type="number">
+
+        </div>
+
+        <div>
+
+          <label>قیمت قبلی</label>
+          <input id="productOldPrice" type="number">
+
+          <label>درصد تخفیف</label>
+          <input id="productDiscount" type="number">
+
+          <label>آدرس تصویر</label>
+          <input id="productImage">
+
+        </div>
+
+      </div>
+
+      <label>توضیحات</label>
+      <textarea id="productDescription"></textarea>
+
+      <button
+        class="success"
+        onclick="addProduct()"
+      >
+        افزودن محصول
+      </button>
+
+      <hr>
+
+      <div id="productsList">
+        <div class="loading">در حال دریافت...</div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DISCOUNT -->
+
+  <div id="discount" class="tab-content">
+
+    <div class="card">
+
+      <h2>پنل تخفیف</h2>
+
+      <label>درصد تخفیف عمومی</label>
+
+      <input
+        id="globalDiscount"
+        type="number"
+        min="0"
+        max="100"
+      >
+
+      <button
+        class="success"
+        onclick="saveDiscount()"
+      >
+        ذخیره تخفیف
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= SUPABASE ================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<!-- ================= CONFIG ================= -->
+
+<script>
+
+window.CAFE_CONFIG = {
+
+  SUPABASE_URL:
+    "https://aivrpevlkpbpzcjskhnj.supabase.co",
+
+  SUPABASE_KEY:
+    "sb_publishable_HN7v3kDhxrQYP1Ru0EJixw_XS_K0cxE"
+
+};
+
+</script>
+
+
+<!-- ================= MAIN ADMIN CODE ================= -->
+
+<script>
+
+console.log("CAFE JIGAR ADMIN START");
+
+const { createClient } = window.supabase;
+
+const supabase = createClient(
+  window.CAFE_CONFIG.SUPABASE_URL,
+  window.CAFE_CONFIG.SUPABASE_KEY
+);
+
+
+/* ================= HELPERS ================= */
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+
+function message(text, error = false) {
+
+  const box = $("status");
+
+  if (!box) return;
+
+  box.innerText = text;
+
+  box.className = error
+    ? "status-error"
+    : "status-ok";
+
+}
+
+
+/* ================= LOGIN ================= */
+
+async function login() {
+
+  const email =
+    $("email").value.trim();
+
+  const password =
+    $("password").value;
+
+  if (!email || !password) {
+
+    message(
+      "ایمیل و رمز عبور را وارد کنید.",
+      true
+    );
+
+    return;
+  }
+
+  const button =
+    $("loginButton");
+
+  button.disabled = true;
+
+  button.innerText =
+    "در حال ورود...";
+
+  message(
+    "در حال اتصال به سرور..."
+  );
+
+  try {
+
+    const result =
+      await supabase.auth.signInWithPassword({
+
+        email: email,
+
+        password: password
+
+      });
+
+
+    if (result.error) {
+
+      console.error(
+        result.error
+      );
+
+      message(
+        "خطا در ورود: " +
+        result.error.message,
+        true
+      );
+
+      button.disabled = false;
+
+      button.innerText =
+        "ورود به پنل";
+
+      return;
+    }
+
+
+    message(
+      "ورود موفق بود. در حال بارگذاری پنل..."
+    );
+
+
+    $("loginPage")
+      .classList
+      .add("hidden");
+
+    $("adminPage")
+      .classList
+      .remove("hidden");
+
+
+    $("userEmail")
+      .innerText =
+      email;
+
+
+    await loadEverything();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    message(
+      "خطای غیرمنتظره: " +
+      error.message,
+      true
+    );
+
+  }
+
+  button.disabled = false;
+
+  button.innerText =
+    "ورود به پنل";
+}
+
+
+/* ================= LOGOUT ================= */
+
+async function logout() {
+
+  await supabase.auth.signOut();
+
+  location.reload();
+
+}
+
+
+/* ================= SESSION ================= */
+
+async function checkSession() {
+
+  try {
+
+    const {
+      data,
+      error
+    } = await supabase.auth.getSession();
+
+
+    if (error) {
+
+      console.error(error);
+
+      return;
+
+    }
+
+
+    if (
+      data &&
+      data.session &&
+      data.session.user
+    ) {
+
+      $("loginPage")
+        .classList
+        .add("hidden");
+
+      $("adminPage")
+        .classList
+        .remove("hidden");
+
+      $("userEmail")
+        .innerText =
+        data.session.user.email;
+
+      await loadEverything();
+
+    }
+
+  } catch (e) {
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* ================= TABS ================= */
+
+function openTab(
+  id,
+  button
+) {
+
+  document
+    .querySelectorAll(".tab-content")
+    .forEach(el => {
+
+      el.classList
+        .remove("active");
+
+    });
+
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(el => {
+
+      el.classList
+        .remove("active");
+
+    });
+
+
+  $(id)
+    .classList
+    .add("active");
+
+
+  button
+    .classList
+    .add("active");
+
+}
+
+
+/* ================= SETTINGS ================= */
+
+async function loadSettings() {
+
+  const result =
+    await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("id", "main")
+      .maybeSingle();
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    return;
+
+  }
+
+
+  if (!result.data) {
+
+    return;
+
+  }
+
+
+  const data =
+    result.data.data || {};
+
+
+  $("siteName").value =
+    data.siteName ||
+    data.name ||
+    "کافه جیگر";
+
+
+  $("siteDescription").value =
+    data.siteDescription ||
+    data.description ||
+    "";
+
+
+  $("sitePhone").value =
+    data.phone ||
+    "";
+
+
+  $("siteAddress").value =
+    data.address ||
+    "";
+
+
+  $("instagram").value =
+    data.instagram ||
+    "";
+
+
+  $("globalDiscount").value =
+    data.globalDiscount ||
+    0;
+
+}
+
+
+async function saveSettings() {
+
+  const oldResult =
+    await supabase
+      .from("site_settings")
+      .select("data")
+      .eq("id", "main")
+      .maybeSingle();
+
+
+  const oldData =
+    oldResult.data?.data || {};
+
+
+  const data = {
+
+    ...oldData,
+
+    siteName:
+      $("siteName").value,
+
+    siteDescription:
+      $("siteDescription").value,
+
+    phone:
+      $("sitePhone").value,
+
+    address:
+      $("siteAddress").value,
+
+    instagram:
+      $("instagram").value,
+
+    globalDiscount:
+      Number(
+        $("globalDiscount").value || 0
+      )
+
+  };
+
+
+  const result =
+    await supabase
+      .from("site_settings")
+      .upsert({
+
+        id: "main",
+
+        data: data,
+
+        updated_at:
+          new Date().toISOString()
+
+      });
+
+
+  if (result.error) {
+
+    alert(
+      "خطا: " +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  alert(
+    "تنظیمات با موفقیت ذخیره شد."
+  );
+
+}
+
+
+/* ================= CATEGORIES ================= */
+
+async function loadCategories() {
+
+  const result =
+    await supabase
+      .from("categories")
+      .select("*")
+      .order(
+        "sort_order",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    $("categoriesList")
+      .innerHTML =
+      "<p>خطا در دریافت دسته‌بندی‌ها</p>";
+
+    return [];
+
+  }
+
+
+  const categories =
+    result.data || [];
+
+
+  $("categoriesList")
+    .innerHTML = "";
+
+
+  categories.forEach(cat => {
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "item";
+
+
+    div.innerHTML = `
+
+      <div class="item-head">
+
+        <strong>
+          ${escapeHtml(cat.name)}
+        </strong>
+
+        <div class="actions">
+
+          <button
+            class="danger"
+            onclick="deleteCategory('${cat.id}')"
+          >
+            حذف
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    $("categoriesList")
+      .appendChild(div);
+
+  });
+
+
+  const select =
+    $("productCategory");
+
+
+  select.innerHTML = "";
+
+
+  categories
+    .filter(c => c.active !== false)
+    .forEach(cat => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        cat.id;
+
+      option.textContent =
+        cat.name;
+
+      select.appendChild(
+        option
+      );
+
+    });
+
+
+  return categories;
+
+}
+
+
+async function addCategory() {
+
+  const name =
+    $("newCategoryName")
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    alert(
+      "نام دسته‌بندی را وارد کنید."
+    );
+
+    return;
+
+  }
+
+
+  const result =
+    await supabase
+      .from("categories")
+      .insert({
+
+        id:
+          "cat_" +
+          Date.now(),
+
+        name:
+          name,
+
+        sort_order:
+          100,
+
+        active:
+          true
+
+      });
+
+
+  if (result.error) {
+
+    alert(
+      "خطا: " +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  $("newCategoryName")
+    .value = "";
+
+
+  await loadCategories();
+
+}
+
+
+async function deleteCategory(id) {
+
+  if (
+    !confirm(
+      "این دسته‌بندی حذف شود؟"
+    )
+  ) return;
+
+
+  const result =
+    await supabase
+      .from("categories")
+      .delete()
+      .eq("id", id);
+
+
+  if (result.error) {
+
+    alert(
+      "خطا: " +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadCategories();
+
+  await loadProducts();
+
+}
+
+
+/* ================= PRODUCTS ================= */
+
+async function loadProducts() {
+
+  const result =
+    await supabase
+      .from("products")
+      .select("*")
+      .order(
+        "sort_order",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    $("productsList")
+      .innerHTML =
+      "<p>خطا در دریافت محصولات</p>";
+
+    return;
+
+  }
+
+
+  const products =
+    result.data || [];
+
+
+  $("productsList")
+    .innerHTML = "";
+
+
+  products.forEach(product => {
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "item";
+
+
+    const price =
+      Number(
+        product.price || 0
+      )
+      .toLocaleString("fa-IR");
+
+
+    div.innerHTML = `
+
+      <div class="item-head">
+
+        <div>
+
+          <strong>
+            ${escapeHtml(product.name || "")}
+          </strong>
+
+          <div>
+            ${price} تومان
+          </div>
+
+          <small>
+            ${escapeHtml(product.description || "")}
+          </small>
+
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="danger"
+            onclick="deleteProduct(${product.id})"
+          >
+            حذف
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    $("productsList")
+      .appendChild(div);
+
+  });
+
+}
+
+
+async function addProduct() {
+
+  const name =
+    $("productName")
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    alert(
+      "نام محصول را وارد کنید."
+    );
+
+    return;
+
+  }
+
+
+  const result =
+    await supabase
+      .from("products")
+      .insert({
+
+        name:
+          name,
+
+        cat:
+          $("productCategory")
+            .value,
+
+        description:
+          $("productDescription")
+            .value,
+
+        price:
+          Number(
+            $("productPrice")
+              .value || 0
+          ),
+
+        old_price:
+          Number(
+            $("productOldPrice")
+              .value || 0
+          ),
+
+        discount:
+          Number(
+            $("productDiscount")
+              .value || 0
+          ),
+
+        image_url:
+          $("productImage")
+            .value,
+
+        featured:
+          false,
+
+        available:
+          true,
+
+        sort_order:
+          100
+
+      });
+
+
+  if (result.error) {
+
+    alert(
+      "خطا: " +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  $("productName").value = "";
+  $("productDescription").value = "";
+  $("productPrice").value = "";
+  $("productOldPrice").value = "";
+  $("productDiscount").value = "";
+  $("productImage").value = "";
+
+
+  await loadProducts();
+
+  alert(
+    "محصول اضافه شد."
+  );
+
+}
+
+
+async function deleteProduct(id) {
+
+  if (
+    !confirm(
+      "این محصول حذف شود؟"
+    )
+  ) return;
+
+
+  const result =
+    await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+
+  if (result.error) {
+
+    alert(
+      "خطا: " +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  await loadProducts();
+
+}
+
+
+/* ================= DISCOUNT ================= */
+
+async function saveDiscount() {
+
+  const value =
+    Number(
+      $("globalDiscount")
+        .value || 0
+    );
+
+
+  const result =
+    await supabase
+      .from("site_settings")
+      .select("data")
+      .eq("id", "main")
+      .maybeSingle();
+
+
+  const data =
+    result.data?.data || {};
+
+
+  data.globalDiscount =
+    value;
+
+
+  const save =
+    await supabase
+      .from("site_settings")
+      .upsert({
+
+        id: "main",
+
+        data: data,
+
+        updated_at:
+          new Date().toISOString()
+
+      });
+
+
+  if (save.error) {
+
+    alert(
+      "خطا: " +
+      save.error.message
+    );
+
+    return;
+
+  }
+
+
+  alert(
+    "تخفیف ذخیره شد."
+  );
+
+}
+
+
+/* ================= LOAD ALL ================= */
+
+async function loadEverything() {
+
+  try {
+
+    await loadSettings();
+
+    await loadCategories();
+
+    await loadProducts();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "خطا در بارگذاری اطلاعات: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* ================= ESCAPE HTML ================= */
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* ================= START ================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    console.log(
+      "CAFE JIGAR ADMIN READY"
+    );
+
+    checkSession();
+
+  }
+);
+
+</script>
 
 </body>
 </html>
