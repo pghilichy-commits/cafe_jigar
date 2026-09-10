@@ -390,3 +390,8 @@ async function load() {
       showStatus(
         'خطا در دسته‌ها: ' +
         categories
+console.log("CAFE JIGAR ADMIN JS LOADED");
+
+document.addEventListener("DOMContentLoaded", function () {
+  alert("admin.js اجرا شد");
+});
