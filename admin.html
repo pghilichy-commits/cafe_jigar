@@ -1,1 +1,318 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>پنل مدیریت | کافه جیگر</title><link rel="stylesheet" href="style.css"><style>body{padding:16px}.admin{max-width:1050px;margin:auto}.panel{background:#151515;border:1px solid #2d2d2d;border-radius:15px;padding:18px;margin:12px 0}.hidden{display:none}.login{max-width:420px;margin:80px auto}.tabs{display:flex;gap:7px;overflow:auto;padding:8px 0}.tab,.admin button{border:1px solid #333;background:#222;color:#eee;border-radius:8px;padding:9px 12px}.tab.on,.primary{background:var(--accent);color:#111;border:0}.danger{background:#3a1717!important;color:#ffb2b2!important}.panel label{display:block;color:#aaa;font-size:12px;margin:12px 0}.panel input,.panel textarea,.panel select{display:block;width:100%;margin-top:6px;background:#0e0e0e;border:1px solid #333;color:#fff;border-radius:9px;padding:10px}.panel textarea{min-height:100px}.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #292929;padding:12px 0}.row small{display:block;color:#888;margin-top:5px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.preview{max-width:250px;max-height:180px;border-radius:10px}@media(max-width:600px){body{padding:8px}.login{margin:30px auto}}</style></head><body><div class="admin"><div id="login" class="panel login"><h2>ورود مدیریت کافه جیگر</h2><label>ایمیل مدیریت<input id="email" type="email" autocomplete="username"></label><label>رمز مدیریت<input id="password" type="password" autocomplete="current-password"></label><div class="actions"><button class="primary" onclick="signIn()">ورود</button></div><p id="status" style="color:#aaa;font-size:11px"></p></div><div id="app" class="hidden"><div class="panel" style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">پنل مدیریت کافه جیگر</h2><small style="color:#888">ذخیره‌سازی آنلاین</small></div><button onclick="signOut()">خروج</button></div><div class="tabs"><button class="tab on" data-t="products" onclick="tab('products')">آیتم‌ها</button><button class="tab" data-t="categories" onclick="tab('categories')">دسته‌ها</button><button class="tab" data-t="home" onclick="tab('home')">صفحه اصلی</button><button class="tab" data-t="brand" onclick="tab('brand')">مجموعه و لوگو</button><button class="tab" data-t="qr" onclick="tab('qr')">QR</button><button class="tab" data-t="footer" onclick="tab('footer')">طراح</button><button class="tab" data-t="appearance" onclick="tab('appearance')">ظاهر</button></div><p id="status" style="color:#aaa"></p><div id="bodyPanel"></div></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="admin.js"></script></body></html>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>پنل مدیریت | کافه جیگر</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      padding: 16px;
+    }
+
+    .admin {
+      max-width: 1050px;
+      margin: auto;
+    }
+
+    .panel {
+      background: #151515;
+      border: 1px solid #2d2d2d;
+      border-radius: 15px;
+      padding: 18px;
+      margin: 12px 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login {
+      max-width: 420px;
+      margin: 80px auto;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 7px;
+      overflow: auto;
+      padding: 8px 0;
+    }
+
+    .tab,
+    .admin button {
+      border: 1px solid #333;
+      background: #222;
+      color: #eee;
+      border-radius: 8px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    .tab.on,
+    .primary {
+      background: var(--accent);
+      color: #111;
+      border: 0;
+    }
+
+    .danger {
+      background: #3a1717 !important;
+      color: #ffb2b2 !important;
+    }
+
+    .panel label {
+      display: block;
+      color: #aaa;
+      font-size: 12px;
+      margin: 12px 0;
+    }
+
+    .panel input,
+    .panel textarea,
+    .panel select {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      background: #0e0e0e;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 9px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .panel textarea {
+      min-height: 100px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(220px, 1fr)
+      );
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #292929;
+      padding: 12px 0;
+    }
+
+    .row small {
+      display: block;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .preview {
+      max-width: 250px;
+      max-height: 180px;
+      border-radius: 10px;
+    }
+
+    #status {
+      min-height: 18px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+
+      .login {
+        margin: 30px auto;
+      }
+
+      .row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="admin">
+
+    <!-- ================= LOGIN ================= -->
+
+    <div id="login" class="panel login">
+
+      <h2>ورود مدیریت کافه جیگر</h2>
+
+      <label>
+        ایمیل مدیریت
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          placeholder="ایمیل مدیریت"
+        >
+      </label>
+
+      <label>
+        رمز مدیریت
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="رمز عبور"
+        >
+      </label>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="primary"
+          onclick="signIn()"
+        >
+          ورود
+        </button>
+      </div>
+
+      <p
+        id="status"
+        style="color:#aaa;font-size:11px"
+      ></p>
+
+    </div>
+
+
+    <!-- ================= ADMIN APP ================= -->
+
+    <div id="app" class="hidden">
+
+      <div
+        class="panel"
+        style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+        "
+      >
+
+        <div>
+          <h2 style="margin:0">
+            پنل مدیریت کافه جیگر
+          </h2>
+
+          <small style="color:#888">
+            ذخیره‌سازی آنلاین
+          </small>
+        </div>
+
+        <button
+          type="button"
+          onclick="signOut()"
+        >
+          خروج
+        </button>
+
+      </div>
+
+
+      <!-- ================= TABS ================= -->
+
+      <div class="tabs">
+
+        <button
+          type="button"
+          class="tab on"
+          data-t="products"
+          onclick="tab('products')"
+        >
+          آیتم‌ها
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="categories"
+          onclick="tab('categories')"
+        >
+          دسته‌ها
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="home"
+          onclick="tab('home')"
+        >
+          صفحه اصلی
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="brand"
+          onclick="tab('brand')"
+        >
+          مجموعه و لوگو
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="qr"
+          onclick="tab('qr')"
+        >
+          QR
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="footer"
+          onclick="tab('footer')"
+        >
+          طراح
+        </button>
+
+        <button
+          type="button"
+          class="tab"
+          data-t="appearance"
+          onclick="tab('appearance')"
+        >
+          ظاهر
+        </button>
+
+      </div>
+
+
+      <!-- ================= CONTENT ================= -->
+
+      <div id="bodyPanel"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= SCRIPTS ================= -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="config.js"></script>
+
+  <script src="admin.js"></script>
+
+</body>
+</html>
