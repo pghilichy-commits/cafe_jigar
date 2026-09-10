@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>کافه جیگر | منوی دیجیتال</title>
+<style>
+:root{--bg:#090909;--card:#151515;--card2:#1d1d1d;--text:#f5f1e8;--muted:#aaa;--accent:#d6a85b;--line:#2b2b2b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.wrap{max-width:1100px;margin:auto;padding:16px}
+.hero{min-height:390px;border-radius:26px;overflow:hidden;position:relative;background:#222 center/cover no-repeat;display:flex;align-items:end}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(0,0,0,.88))}
+.heroContent{position:relative;z-index:2;padding:28px;width:100%}.logo{width:76px;height:76px;border-radius:20px;background:#fff;object-fit:contain;padding:6px;display:none}.kicker{color:var(--accent);letter-spacing:2px;font-size:11px;margin-top:12px}.hero h1{font-size:42px;margin:8px 0}.hero p{color:#ddd;max-width:650px;line-height:2;margin:0}.heroBtn{margin-top:18px;border:0;border-radius:12px;padding:12px 20px;background:var(--accent);color:#111;font-weight:bold}
+.bar{position:sticky;top:0;z-index:5;background:rgba(9,9,9,.94);backdrop-filter:blur(12px);padding:12px 0}.search{width:100%;background:#161616;border:1px solid var(--line);color:#fff;padding:13px;border-radius:12px}.cats{display:flex;gap:8px;overflow:auto;padding:10px 0}.cat{white-space:nowrap;border:1px solid var(--line);background:#111;color:#ddd;padding:9px 14px;border-radius:30px}.cat.active{background:var(--accent);color:#111}
+.title{display:flex;align-items:center;justify-content:space-between;margin:25px 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.product{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}.pimg{width:100%;height:170px;object-fit:cover;background:#222}.pbody{padding:14px}.pbody h3{margin:0 0 8px}.desc{color:var(--muted);font-size:12px;line-height:1.8;min-height:43px}.price{margin-top:12px;color:var(--accent);font-weight:bold}.old{text-decoration:line-through;color:#777;font-size:11px;margin-left:7px}.badge{display:inline-block;background:#2d2315;color:var(--accent);padding:4px 8px;border-radius:20px;font-size:10px;margin-bottom:7px}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:35px}.infoBox{padding:18px;background:var(--card);border:1px solid var(--line);border-radius:16px}.infoBox small{color:var(--muted)}footer{border-top:1px solid var(--line);margin-top:35px;padding:22px 0;color:#888;text-align:center;font-size:11px}
+.fab{position:fixed;bottom:20px;left:20px;z-index:20;border:0;border-radius:50%;width:54px;height:54px;background:var(--accent);font-size:20px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:30;display:none;overflow:auto}.modal.show{display:block}.admin{max-width:1050px;margin:25px auto;background:#101010;border:1px solid #333;border-radius:20px;padding:18px}.adminHead{display:flex;justify-content:space-between;align-items:center;gap:10px}.tabs{display:flex;gap:7px;overflow:auto;padding:12px 0}.tabs button{white-space:nowrap;background:#191919;color:#ddd;border:1px solid #333;border-radius:9px;padding:9px 12px}.tabs .on{background:var(--accent);color:#111}
+.panel{background:#151515;border:1px solid #2d2d2d;border-radius:15px;padding:15px;margin-bottom:12px}.panel h3{margin-top:0}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.field{margin:10px 0}.field label{display:block;color:#aaa;font-size:11px;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;background:#0e0e0e;border:1px solid #333;color:#fff;border-radius:9px;padding:10px}.field textarea{min-height:85px;resize:vertical}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.primary{background:var(--accent)!important;color:#111!important;border:0!important}.danger{background:#3a1717!important;color:#ffb2b2!important}.admin button{border:1px solid #333;background:#222;color:#eee;border-radius:8px;padding:9px 12px}.item{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #292929;padding:10px 0}.thumb{width:70px;height:60px;border-radius:9px;object-fit:cover;background:#222}.login{max-width:380px;margin:100px auto;background:#151515;padding:25px;border-radius:18px;border:1px solid #333}.hidden{display:none!important}.qrBox{background:#fff;color:#111;padding:15px;border-radius:14px;text-align:center;width:max-content;max-width:100%;margin:15px auto}.qrBox img{display:block;width:240px;height:240px;max-width:70vw}.preview{max-width:100%;max-height:220px;border-radius:12px;display:block;margin-top:10px}
+@media(max-width:600px){.hero{min-height:330px}.hero h1{font-size:32px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pimg{height:135px}.wrap{padding:10px}.admin{margin:8px}.item{grid-template-columns:55px 1fr}.item .actions{grid-column:1/-1}.thumb{width:55px;height:50px}}
+
+.qrPublic{margin-top:35px;padding:18px;border:1px solid var(--line);background:var(--card);border-radius:20px;display:grid;grid-template-columns:1fr 270px;gap:18px;align-items:center}.qrPublicText h2{margin:5px 0 8px}.qrPublicText p{color:#aaa;line-height:1.9}.qrPublicText a{display:inline-block;color:var(--accent);direction:ltr;word-break:break-all;font-size:12px}.qrPublicBox{background:#fff;color:#111;padding:12px;border-radius:14px;text-align:center}.qrPublicBox img{width:230px;height:230px;display:block;margin:auto}.qrPublicBox small{display:block;margin-top:7px}@media(max-width:650px){.qrPublic{grid-template-columns:1fr;text-align:center}.qrPublicBox{margin:auto}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<main class="wrap">
+<section class="hero" id="hero">
+ <div class="heroContent">
+  <img id="logo" class="logo">
+  <div class="kicker" id="kicker"></div><h1 id="heroTitle"></h1><p id="heroText"></p>
+  <button class="heroBtn" id="heroBtn" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})"></button>
+ </div>
+</section>
+<div class="bar">
+ <input id="search" class="search" placeholder="جستجو در منو..." oninput="renderMenu()">
+ <div id="cats" class="cats"></div>
+</div>
+<section id="menu">
+ <div class="title"><h2 id="sectionTitle"></h2><small id="count" style="color:#888"></small></div>
+ <div id="grid" class="grid"></div>
+</section>
+<section class="qrPublic" id="qrPublic">
+ <div class="qrPublicText"><div class="kicker">DIGITAL MENU</div><h2>منوی آنلاین کافه جیگر</h2><p id="qrPublicLabel"></p><a id="qrPublicLink" href="#" target="_blank" rel="noopener"></a></div>
+ <div class="qrPublicBox"><img id="qrPublicImg" alt="QR Code منوی کافه جیگر"><small>برای باز کردن منو اسکن کنید</small></div>
+</section>
+<section class="info">
+ <div class="infoBox"><small>تلفن</small><div id="phone"></div></div>
+ <div class="infoBox"><small>اینستاگرام</small><div id="instagram"></div></div>
+ <div class="infoBox"><small>آدرس</small><div id="address"></div></div>
+ <div class="infoBox"><small>ساعت کاری</small><div id="hours"></div></div>
+</section>
+<footer><div id="designer"></div></footer>
+</main>
+<button class="fab" id="adminOpenBtn" type="button">⚙</button>
+
+<div class="modal" id="modal">
+ <div id="login" class="login"><div style="font-size:11px;color:#888;margin-bottom:12px">ورود به مدیریت کافه جیگر</div>
+  <h2>ورود مدیریت</h2>
+  <div class="field"><label>رمز مدیریت</label><input id="pass" type="password" autocomplete="current-password"></div>
+  <div class="actions"><button class="primary" type="button" onclick="login()">ورود</button><button type="button" onclick="closeAdmin()">بستن</button></div>
+  <div style="margin-top:12px;font-size:10px;color:#777">اگر قبلاً نسخه قدیمی را باز کرده‌ای و ورود مشکل دارد، از منوی مرورگر اطلاعات سایت را پاک کن و دوباره فایل را باز کن.</div>
+ </div>
+ <div id="admin" class="admin hidden">
+  <div class="adminHead"><div><h2 style="margin:0">پنل مدیریت کافه جیگر</h2><small style="color:#888">همه بخش‌های منو قابل ویرایش است</small></div><button onclick="closeAdmin()">✕</button></div>
+  <div class="tabs">
+   <button class="on" data-tab="products">آیتم‌ها</button><button data-tab="catsTab">دسته‌ها</button><button data-tab="homeTab">صفحه اصلی</button><button data-tab="brandTab">مجموعه و لوگو</button><button data-tab="qrTab">QR</button><button data-tab="footerTab">طراح</button><button data-tab="appearance">ظاهر</button>
+  </div>
+  <div id="adminBody"></div>
+ </div>
+</div>
+
+<script>
+const SUPABASE_URL="https://aivrpevlkpbpzcjskhnj.supabase.co";
+const SUPABASE_KEY="sb_publishable_HN7v3kDhxrQYP1Ru0EJixw_XS_K0cxE";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const fallbackImg="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&q=80";
+let db={home:{kicker:"CAFE • JIGAR",title:"کافه جیگر",text:"طعم خوب، فضای خاص و تجربه‌ای متفاوت",button:"مشاهده منو",hero:fallbackImg},brand:{name:"کافه جیگر",phone:"",instagram:"",address:"",hours:"",logo:""},cats:[{id:"all",name:"همه"}],products:[],qr:{url:"",label:"برای مشاهده منوی کافه جیگر اسکن کنید",size:240},footer:{designer:"",link:"",show:true},appearance:{accent:"#d6a85b",bg:"#090909",card:"#151515",heroDark:88}};
+let activeCat="all";
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function money(n){return Number(n||0).toLocaleString("fa-IR")+" تومان"}
+function imgSrc(p){return p.image_url||fallbackImg}
+function renderPublicQR(){const q=db.qr||{};const url=q.url||location.href;const size=Math.min(600,Math.max(120,+q.size||240));$("qrPublicLabel").textContent=q.label||"برای مشاهده منوی کافه جیگر اسکن کنید";const a=$("qrPublicLink");a.href=url;a.textContent=url;$("qrPublicImg").src=`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`}
+function renderAll(){const a=db.appearance||{};document.documentElement.style.setProperty("--accent",a.accent||"#d6a85b");document.documentElement.style.setProperty("--bg",a.bg||"#090909");document.documentElement.style.setProperty("--card",a.card||"#151515");const h=db.home||{};$("hero").style.backgroundImage=`linear-gradient(rgba(0,0,0,.${Number(a.heroDark??88)/100}),rgba(0,0,0,.${Number(a.heroDark??88)/100})),url("${h.hero||fallbackImg}")`;$("kicker").textContent=h.kicker||"CAFE • JIGAR";$("heroTitle").textContent=h.title||db.brand.name||"کافه جیگر";$("heroText").textContent=h.text||"";$("heroBtn").textContent=h.button||"مشاهده منو";document.title=(db.brand.name||"کافه جیگر")+" | منوی دیجیتال";$("phone").textContent=db.brand.phone||"";$("instagram").textContent=db.brand.instagram?"@"+String(db.brand.instagram).replace(/^@/,""):"";$("address").textContent=db.brand.address||"";$("hours").textContent=db.brand.hours||"";if(db.brand.logo){$("logo").src=db.brand.logo;$("logo").style.display="block"}else $("logo").style.display="none";$("designer").innerHTML=db.footer&&db.footer.show?(db.footer.link?`<a href="${esc(db.footer.link)}" target="_blank" style="color:var(--accent)">${esc(db.footer.designer||"")}</a>`:esc(db.footer.designer||"")):"";renderCats();renderMenu();renderPublicQR()}
+function renderCats(){$("cats").innerHTML=(db.cats||[]).map(c=>`<button class="cat ${activeCat===c.id?"active":""}" onclick="activeCat='${String(c.id).replace(/'/g,"\\'")}';renderCats();renderMenu()">${esc(c.name)}</button>`).join("")}
+function renderMenu(){const q=$("search").value.trim().toLowerCase();let list=(db.products||[]).filter(p=>p.available!==false&&(activeCat==="all"||p.cat===activeCat)&&(!q||(`${p.name||""} ${p.description||""}`).toLowerCase().includes(q)));$("sectionTitle").textContent=activeCat==="all"?"منوی کافه جیگر":((db.cats||[]).find(c=>c.id===activeCat)?.name||"منو");$("count").textContent=list.length+" آیتم";$("grid").innerHTML=list.length?list.map(p=>`<article class="product"><img class="pimg" src="${imgSrc(p)}" onerror="this.src='${fallbackImg}'"><div class="pbody">${p.discount?`<span class="badge">${p.discount}% تخفیف</span>`:""}<h3>${esc(p.name)}</h3><div class="desc">${esc(p.description||"")}</div><div class="price">${p.old_price?`<span class="old">${money(p.old_price)}</span>`:""}${money(Number(p.price||0)*(1-(Number(p.discount||0)/100)))}</div></div></article>`).join(""):`<div class="panel">در حال حاضر آیتمی برای نمایش ثبت نشده است.</div>`}
+async function loadOnline(){try{const [a,c,p]=await Promise.all([sb.from("site_settings").select("data").eq("id","main").maybeSingle(),sb.from("categories").select("id,name,sort_order,active").eq("active",true).order("sort_order"),sb.from("products").select("id,name,cat,description,price,old_price,discount,image_url,featured,available,sort_order").order("sort_order").order("id")]);if(a.error||c.error||p.error){console.error(a.error||c.error||p.error);renderAll();return}const S=a.data?.data||{};db={...db,...S,brand:{...db.brand,...(S.brand||{})},home:{...db.home,...(S.home||{})},appearance:{...db.appearance,...(S.appearance||{})},qr:{...db.qr,...(S.qr||{})},footer:{...db.footer,...(S.footer||{})},cats:[{id:"all",name:"همه"},...(c.data||[]).filter(x=>x.id!=="all").map(x=>({id:x.id,name:x.name}))],products:(p.data||[]).filter(x=>x.available!==false)};renderAll()}catch(e){console.error(e);renderAll()}}
+$("search").addEventListener("input",renderMenu);loadOnline();
+</script>
+</body></html>
