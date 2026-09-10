@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ورود مدیریت کافه جیگر</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090909;color:#fff;font-family:Tahoma,Arial,sans-serif;min-height:100vh;display:grid;place-items:center}
+.card{width:min(430px,92%);background:#151515;border:1px solid #292929;border-radius:24px;padding:30px;box-shadow:0 25px 80px #000}
+.logo{width:78px;height:78px;border-radius:20px;background:#d6a85b;color:#111;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 18px}
+h1{text-align:center;margin:0 0 8px;font-size:25px}p{text-align:center;color:#aaa;margin:0 0 25px}
+label{display:block;color:#ccc;margin:14px 0 7px}input{width:100%;padding:14px 15px;border-radius:12px;border:1px solid #3a3a3a;background:#222;color:#fff;font-size:16px;outline:none}
+input:focus{border-color:#d6a85b}button{width:100%;margin-top:18px;padding:15px;border:0;border-radius:12px;background:#d6a85b;color:#111;font-weight:800;font-size:16px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}#status{margin-top:15px;padding:12px;border-radius:12px;background:#222;color:#ddd;line-height:1.8;display:none;white-space:pre-wrap}
+.err{display:block!important;background:#481818!important;color:#ffdede!important}.ok{display:block!important;background:#123b22!important;color:#d8ffe5!important}
+small{display:block;text-align:center;color:#666;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="logo">ج</div>
+<h1>مدیریت کافه جیگر</h1>
+<p>ورود به پنل مدیریت آنلاین</p>
+<label>ایمیل</label>
+<input id="email" type="email" value="pghilichy@gmail.com" autocomplete="username">
+<label>رمز عبور</label>
+<input id="password" type="password" value="8585" autocomplete="current-password">
+<button id="loginBtn" type="button">ورود به پنل</button>
+<div id="status"></div>
+<small>CAFE JIGAR • ONLINE CMS</small>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL='https://aivrpevlkpbpzcjskhnj.supabase.co';
+const SB_KEY='sb_publishable_HN7v3kDhxrQYP1Ru0EJixw_XS_K0cxE';
+const supabase=window.supabase.createClient(SB_URL,SB_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+const btn=document.getElementById('loginBtn'), status=document.getElementById('status');
+function show(t,c=''){status.textContent=t;status.className=c}
+(async()=>{
+  try{const {data}=await supabase.auth.getSession();if(data.session) location.replace('admin.html?v=final');}
+  catch(e){}
+})();
+btn.addEventListener('click',async()=>{
+  btn.disabled=true;show('در حال ورود...'); 
+  try{
+    const email=document.getElementById('email').value.trim(), password=document.getElementById('password').value;
+    if(!email||!password) throw new Error('ایمیل و رمز عبور را وارد کنید.');
+    const {data,error}=await supabase.auth.signInWithPassword({email,password});
+    if(error){show('ورود ناموفق:\n'+error.message,'err');return}
+    if(!data.session){show('ورود انجام شد ولی Session دریافت نشد.','err');return}
+    show('ورود موفق شد؛ در حال باز کردن پنل...','ok');
+    setTimeout(()=>location.replace('admin.html?v='+Date.now()),250);
+  }catch(e){show('خطا:\n'+(e?.message||String(e)),'err')}
+  finally{btn.disabled=false}
+});
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')btn.click()});
+</script>
+</body></html>

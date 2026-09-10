@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>پنل مدیریت کافه جیگر</title>
+<style>
+*{box-sizing:border-box}:root{--bg:#090909;--card:#151515;--line:#292929;--accent:#d6a85b;--muted:#999}
+body{margin:0;background:var(--bg);color:#fff;font-family:Tahoma,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#101010ee;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:900;font-size:20px}.brand span{color:var(--accent)}.user{color:#aaa;font-size:12px}
+.wrap{max-width:1200px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 15px}
+.tab{white-space:nowrap;border:1px solid var(--line);background:var(--card);color:#ddd;border-radius:12px;padding:11px 14px;cursor:pointer}.tab.active{background:var(--accent);color:#111;border-color:var(--accent);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:14px}
+h2{margin:0 0 15px;font-size:19px}h3{margin:0 0 10px}.muted{color:var(--muted);font-size:13px}
+label{display:block;color:#ccc;font-size:13px;margin:10px 0 6px}input,textarea,select{width:100%;padding:12px;border:1px solid #393939;border-radius:10px;background:#202020;color:#fff;outline:none;font-family:inherit}textarea{min-height:90px;resize:vertical}
+button{border:0;border-radius:10px;padding:11px 14px;background:var(--accent);color:#111;font-weight:800;cursor:pointer}button.secondary{background:#292929;color:#fff}button.danger{background:#8e3030;color:#fff}button.small{padding:7px 10px;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.between{display:flex;justify-content:space-between;gap:10px;align-items:center}
+table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}th{color:#aaa;font-size:12px}td{font-size:13px}
+.thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;background:#222}.hide{display:none!important}
+.notice{padding:12px;border-radius:12px;background:#202020;margin-bottom:14px;white-space:pre-wrap}.ok{background:#123a22}.err{background:#481818}
+.kpi{font-size:28px;font-weight:900;color:var(--accent)}.preview{max-height:150px;max-width:100%;border-radius:12px;margin-top:10px}
+@media(max-width:750px){.grid,.grid3{grid-template-columns:1fr}header{position:relative}table{display:block;overflow:auto;white-space:nowrap}}
+</style>
+</head>
+<body>
+<header><div class="brand">کافه <span>جیگر</span> — مدیریت آنلاین</div><div class="row"><span class="user" id="userEmail"></span><button class="secondary small" id="logout">خروج</button></div></header>
+<div class="wrap">
+<div id="notice" class="notice hide"></div>
+<div class="tabs">
+<button class="tab active" data-tab="dashboard">داشبورد</button>
+<button class="tab" data-tab="products">محصولات</button>
+<button class="tab" data-tab="categories">دسته‌بندی</button>
+<button class="tab" data-tab="appearance">ظاهر و سازنده</button>
+<button class="tab" data-tab="about">معرفی کافه</button>
+<button class="tab" data-tab="discount">تخفیف</button>
+</div>
+
+<section id="dashboard" class="page">
+<div class="grid3">
+<div class="card"><div class="muted">تعداد محصولات</div><div class="kpi" id="kProducts">0</div></div>
+<div class="card"><div class="muted">دسته‌بندی‌ها</div><div class="kpi" id="kCats">0</div></div>
+<div class="card"><div class="muted">محصولات فعال</div><div class="kpi" id="kActive">0</div></div>
+</div>
+<div class="card"><h2>دسترسی سریع</h2><div class="row"><button onclick="openTab('products')">مدیریت محصولات</button><button onclick="openTab('appearance')">ویرایش اطلاعات کافه</button><button onclick="openTab('discount')">پنل تخفیف</button></div></div>
+</section>
+
+<section id="products" class="page hide">
+<div class="card"><div class="between"><h2>مدیریت محصولات</h2><button onclick="newProduct()">+ محصول جدید</button></div>
+<div class="grid">
+<div>
+<input type="hidden" id="pId"><label>نام محصول</label><input id="pName">
+<label>دسته‌بندی</label><select id="pCat"></select>
+<label>توضیحات</label><textarea id="pDesc"></textarea>
+</div>
+<div>
+<label>قیمت</label><input id="pPrice" type="number">
+<label>قیمت قبلی</label><input id="pOld" type="number">
+<label>درصد تخفیف</label><input id="pDiscount" type="number" min="0" max="100">
+<label>آدرس تصویر یا لینک تصویر</label><input id="pImage" placeholder="https://...">
+<label>یا انتخاب تصویر مستقیم</label><input id="pFile" type="file" accept="image/*">
+<label class="row"><input id="pFeatured" type="checkbox" style="width:auto"> ویژه</label>
+<label class="row"><input id="pAvailable" type="checkbox" checked style="width:auto"> موجود / فعال</label>
+</div>
+</div>
+<div class="row" style="margin-top:12px"><button onclick="saveProduct()">ذخیره محصول</button><button class="secondary" onclick="newProduct()">پاک کردن فرم</button></div>
+</div>
+<div class="card"><h2>لیست محصولات</h2><div id="productTable"></div></div>
+</section>
+
+<section id="categories" class="page hide">
+<div class="card"><h2>افزودن / ویرایش دسته‌بندی</h2><div class="grid3"><input type="text" id="cId" placeholder="شناسه مثل hot"><input type="text" id="cName" placeholder="نام دسته"><input type="number" id="cSort" placeholder="ترتیب"></div><div class="row" style="margin-top:12px"><label class="row"><input id="cActive" type="checkbox" checked style="width:auto"> فعال</label><button onclick="saveCategory()">ذخیره</button></div></div>
+<div class="card"><h2>دسته‌بندی‌ها</h2><div id="catTable"></div></div>
+</section>
+
+<section id="appearance" class="page hide">
+<div class="card"><h2>اطلاعات اصلی و سازنده</h2><div class="grid">
+<div><label>نام کافه</label><input id="sBrand"><label>ساعت کاری</label><input id="sHours"><label>تلفن</label><input id="sPhone"><label>آدرس</label><textarea id="sAddress"></textarea><label>اینستاگرام</label><input id="sInstagram"><label>لوگو (URL)</label><input id="sLogo"><input id="sLogoFile" type="file" accept="image/*"></div>
+<div><label>عنوان صفحه اصلی</label><input id="sTitle"><label>متن اصلی</label><input id="sText"><label>برچسب</label><input id="sKicker"><label>متن دکمه</label><input id="sButton"><label>تصویر پس‌زمینه / Hero (URL)</label><input id="sHero"><input id="sHeroFile" type="file" accept="image/*"></div>
+</div></div>
+<div class="card"><h2>رنگ و ظاهر</h2><div class="grid3"><div><label>پس‌زمینه</label><input id="sBg" type="color"></div><div><label>کارت</label><input id="sCard" type="color"></div><div><label>رنگ تأکیدی</label><input id="sAccent" type="color"></div></div></div>
+<div class="card"><h2>سازنده / فوتر</h2><div class="grid"><div><label>متن سازنده</label><input id="sDesigner"><label>متن فوتر</label><input id="sFooter"></div><div><label>لینک فوتر</label><input id="sFooterLink"><label>نمایش فوتر</label><select id="sFooterShow"><option value="true">بله</option><option value="false">خیر</option></select></div></div><button onclick="saveSettings()" style="margin-top:12px">ذخیره همه تنظیمات</button></div>
+</section>
+
+<section id="about" class="page hide">
+<div class="card"><h2>معرفی کافه</h2><label>متن معرفی</label><textarea id="sAboutText" style="min-height:180px"></textarea><label>تصویر معرفی (URL)</label><input id="sAboutImage"><input id="sAboutFile" type="file" accept="image/*"><button onclick="saveAbout()" style="margin-top:12px">ذخیره معرفی</button></div>
+</section>
+
+<section id="discount" class="page hide">
+<div class="card"><h2>پنل تخفیف</h2><div class="grid3"><div><label>تخفیف عمومی درصدی</label><input id="dPercent" type="number" min="0" max="100"></div><div><label>فعال</label><select id="dEnabled"><option value="true">فعال</option><option value="false">غیرفعال</option></select></div><div><label>متن تخفیف</label><input id="dText"></div></div><p class="muted">این بخش تنظیمات تخفیف عمومی را ذخیره می‌کند؛ تخفیف هر محصول نیز از بخش محصولات قابل تنظیم است.</p><button onclick="saveDiscount()">ذخیره تخفیف</button></div>
+</section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL='https://aivrpevlkpbpzcjskhnj.supabase.co', SB_KEY='sb_publishable_HN7v3kDhxrQYP1Ru0EJixw_XS_K0cxE';
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{
+ auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+let products=[], cats=[], settings={};
+const $=id=>document.getElementById(id);
+function note(t,ok=false){const n=$('notice');n.textContent=t;n.className='notice '+(ok?'ok':'err');setTimeout(()=>n.className='notice hide',5000)}
+function openTab(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('hide',x.id!==id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
+
+async function boot(){
+ const {data,error}=await sb.auth.getSession();
+ if(error||!data.session){location.replace('login.html?need-login=1');return}
+ $('userEmail').textContent=data.session.user.email||'';
+ await Promise.all([loadSettings(),loadCats(),loadProducts()]);
+ renderAll();
+}
+async function loadSettings(){
+ const {data,error}=await sb.from('site_settings').select('data').eq('id','main').maybeSingle();
+ if(error) throw error; settings=data?.data||{};
+}
+async function loadCats(){
+ const {data,error}=await sb.from('categories').select('*').order('sort_order',{ascending:true});
+ if(error) throw error; cats=data||[];
+}
+async function loadProducts(){
+ const {data,error}=await sb.from('products').select('*').order('sort_order',{ascending:true}).order('id',{ascending:true});
+ if(error) throw error; products=data||[];
+}
+function renderAll(){renderCats();renderProducts();fillSettings();$('kProducts').textContent=products.length;$('kCats').textContent=cats.length;$('kActive').textContent=products.filter(p=>p.available!==false).length}
+function renderCats(){
+ $('pCat').innerHTML=cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} </option>`).join('');
+ $('catTable').innerHTML='<table><tr><th>شناسه</th><th>نام</th><th>ترتیب</th><th>وضعیت</th><th></th></tr>'+cats.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.name)}</td><td>${c.sort_order??0}</td><td>${c.active?'فعال':'غیرفعال'}</td><td><button class="small secondary" onclick="editCat('${esc(c.id)}')">ویرایش</button></td></tr>`).join('')+'</table>';
+}
+function renderProducts(){
+ $('productTable').innerHTML='<table><tr><th>تصویر</th><th>محصول</th><th>دسته</th><th>قیمت</th><th>وضعیت</th><th></th></tr>'+products.map(p=>`<tr><td>${p.image_url?`<img class="thumb" src="${esc(p.image_url)}">`:''}</td><td>${esc(p.name)}</td><td>${esc(cats.find(c=>c.id===p.cat)?.name||p.cat||'')}</td><td>${Number(p.price||0).toLocaleString('fa-IR')}</td><td>${p.available===false?'غیرفعال':'فعال'}</td><td class="row"><button class="small secondary" onclick="editProduct(${p.id})">ویرایش</button></td></tr>`).join('')+'</table>';
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function newProduct(){['pId','pName','pDesc','pPrice','pOld','pDiscount','pImage'].forEach(id=>$(id).value='');$('pFeatured').checked=false;$('pAvailable').checked=true;if(cats[0])$('pCat').value=cats[0].id;$('pFile').value='';}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$('pId').value=p.id;$('pName').value=p.name||'';$('pCat').value=p.cat||'';$('pDesc').value=p.description||'';$('pPrice').value=p.price||'';$('pOld').value=p.old_price||'';$('pDiscount').value=p.discount||'';$('pImage').value=p.image_url||'';$('pFeatured').checked=!!p.featured;$('pAvailable').checked=p.available!==false;openTab('products');scrollTo(0,0)}
+async function upload(file,folder){if(!file)return null;const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;const {error}=await sb.storage.from('menu-images').upload(path,file,{upsert:false,contentType:file.type||'image/jpeg'});if(error)throw error;return SB_URL+'/storage/v1/object/public/menu-images/'+path}
+async function saveProduct(){
+ try{let image=$('pImage').value.trim();const f=$('pFile').files[0];if(f) image=await upload(f,'products');
+ let id=Number($('pId').value);if(!id) id=products.reduce((m,p)=>Math.max(m,Number(p.id)||0),0)+1;
+ const payload={id,name:$('pName').value.trim(),cat:$('pCat').value,description:$('pDesc').value.trim(),price:Number($('pPrice').value||0),old_price:Number($('pOld').value||0),discount:Number($('pDiscount').value||0),image_url:image,featured:$('pFeatured').checked,available:$('pAvailable').checked,sort_order:products.find(p=>p.id===id)?.sort_order||products.length};
+ if(!payload.name)throw new Error('نام محصول الزامی است.');
+ const {error}=await sb.from('products').upsert(payload);if(error)throw error;await loadProducts();renderAll();newProduct();note('محصول با موفقیت ذخیره شد.',true)}catch(e){note('خطا در ذخیره محصول:\n'+(e?.message||e))}
+}
+function editCat(id){const c=cats.find(x=>x.id===id);if(!c)return;$('cId').value=c.id;$('cName').value=c.name||'';$('cSort').value=c.sort_order||0;$('cActive').checked=c.active!==false;openTab('categories')}
+async function saveCategory(){
+ try{const payload={id:$('cId').value.trim(),name:$('cName').value.trim(),sort_order:Number($('cSort').value||0),active:$('cActive').checked};if(!payload.id||!payload.name)throw new Error('شناسه و نام دسته‌بندی الزامی است.');const {error}=await sb.from('categories').upsert(payload);if(error)throw error;await loadCats();renderAll();note('دسته‌بندی ذخیره شد.',true)}catch(e){note('خطا در ذخیره دسته‌بندی:\n'+(e?.message||e))}
+}
+function fillSettings(){
+ const b=settings.brand||{},h=settings.home||{},a=settings.appearance||{},f=settings.footer||{},q=settings.qr||{},about=settings.about||{},d=settings.discount||{};
+ $('sBrand').value=b.name||'';$('sHours').value=b.hours||'';$('sPhone').value=b.phone||'';$('sAddress').value=b.address||'';$('sInstagram').value=b.instagram||'';$('sLogo').value=b.logo||'';
+ $('sTitle').value=h.title||'';$('sText').value=h.text||'';$('sKicker').value=h.kicker||'';$('sButton').value=h.button||'';$('sHero').value=h.hero||'';
+ $('sBg').value=a.bg||'#090909';$('sCard').value=a.card||'#151515';$('sAccent').value=a.accent||'#d6a85b';
+ $('sDesigner').value=f.designer||'';$('sFooter').value=f.text||'';$('sFooterLink').value=f.link||'';$('sFooterShow').value=String(f.show!==false);
+ $('sAboutText').value=about.text||'';$('sAboutImage').value=about.image||'';
+ $('dPercent').value=d.percent||0;$('dEnabled').value=String(d.enabled===true);$('dText').value=d.text||'';
+}
+async function saveSettings(){
+ try{const logoFile=$('sLogoFile').files[0],heroFile=$('sHeroFile').files[0];if(logoFile)settings.brand={...(settings.brand||{}),logo:await upload(logoFile,'brand')};if(heroFile)settings.home={...(settings.home||{}),hero:await upload(heroFile,'hero')};
+ settings={...settings,brand:{...(settings.brand||{}),name:$('sBrand').value,hours:$('sHours').value,phone:$('sPhone').value,address:$('sAddress').value,instagram:$('sInstagram').value,logo:$('sLogo').value||settings.brand?.logo||''},home:{...(settings.home||{}),title:$('sTitle').value,text:$('sText').value,kicker:$('sKicker').value,button:$('sButton').value,hero:$('sHero').value||settings.home?.hero||''},appearance:{bg:$('sBg').value,card:$('sCard').value,accent:$('sAccent').value,heroDark:settings.appearance?.heroDark||88},footer:{show:$('sFooterShow').value==='true',designer:$('sDesigner').value,text:$('sFooter').value,link:$('sFooterLink').value}};
+ const {error}=await sb.from('site_settings').upsert({id:'main',data:settings,updated_at:new Date().toISOString()});if(error)throw error;note('همه تنظیمات ذخیره شد.',true)}catch(e){note('خطا در تنظیمات:\n'+(e?.message||e))}
+}
+async function saveAbout(){
+ try{let img=$('sAboutImage').value.trim();const f=$('sAboutFile').files[0];if(f)img=await upload(f,'about');settings={...settings,about:{text:$('sAboutText').value,image:img||settings.about?.image||''}};const {error}=await sb.from('site_settings').upsert({id:'main',data:settings,updated_at:new Date().toISOString()});if(error)throw error;note('معرفی کافه ذخیره شد.',true)}catch(e){note('خطا:\n'+(e?.message||e))}
+}
+async function saveDiscount(){
+ try{settings={...settings,discount:{percent:Number($('dPercent').value||0),enabled:$('dEnabled').value==='true',text:$('dText').value}};const {error}=await sb.from('site_settings').upsert({id:'main',data:settings,updated_at:new Date().toISOString()});if(error)throw error;note('تخفیف ذخیره شد.',true)}catch(e){note('خطا:\n'+(e?.message||e))}
+}
+$('logout').onclick=async()=>{await sb.auth.signOut();location.replace('login.html?logout=1')};
+sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session)location.replace('login.html?expired=1')});
+boot().catch(e=>note('خطا در بارگذاری پنل:\n'+(e?.message||e)));
+</script>
+</body></html>
